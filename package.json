@@ -1,27 +1,39 @@
-{ "name": "pimatic-plugin-template",
-  "description": "The plugin description",
-  "author": "Your Name <you@example.com> (http://your-website)",
-  "main": "my-plugin",
+{
+  "name": "pimatic-rfl868",
+  "description": "pimatic plugin to use various 868 MHz devices, sensors and more with an rfl868 gateway.",
+  "author": {
+    "name": "Guss",
+    "email": "guss1359@gmail.com",
+    "url": "http://github.com/akicker"
+  },
+  "main": "rfl868",
   "files": [
-    "my-plugin.coffee",
+    "rfl868.coffee",
+    "lib",
     "README.md",
-    "my-plugin-config-schema.coffee"
+    "rfl868-config-schema.coffee",
+    "device-config-schema.coffee"
   ],
-  "version": "0.8.0",
-  "homepage": "http://your-plugin-website",
+  "version": "0.7.2",
+  "license": "GPL-2.0",
+  "homepage": "http://pimatic.org",
   "private": true,
   "repository": {
     "type": "git",
-    "url": "git://github.com/pimatic/pimatic-plugin-template.git"
+    "url": "git:/home/pi/pimatic-app/node_modules/pimatic-rfl868"
   },
-  "configSchema": "my-plugin-config-schema.coffee",
+  "configSchema": "rfl868-config-schema.coffee",
   "dependencies": {
+    "bluebird": "~2.9.14",
+    "serialport": "~2.0.6"
   },
   "peerDependencies": {
-    "pimatic": "0.8.*"
+    "pimatic": ">=0.8.0 <1.0.0"
   },
   "engines": {
     "node": ">0.8.x",
     "npm": ">1.1.x"
   }
 }
+
+
