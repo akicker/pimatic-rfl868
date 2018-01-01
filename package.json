@@ -20,7 +20,7 @@
   "private": true,
   "repository": {
     "type": "git",
-    "url": "git:/home/pi/pimatic-app/node_modules/pimatic-rfl868"
+    "url": "git:https://github.com/akicker/pimatic-rfl868"
   },
   "configSchema": "rfl868-config-schema.coffee",
   "dependencies": {
