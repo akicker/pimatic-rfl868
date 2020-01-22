@@ -1,5 +1,5 @@
 Updated Version to run with node 8 using serialport 6.2.2
-
+=========================================================
 Install with:
 sudo service pimatic stop
 # update npm
@@ -14,7 +14,6 @@ npm rebuild
 # manually add plugin rfl868 to config.json
 cd
 sudo /home/pi/pimatic-app/node_modules/pimatic/pimatic.js
-
 
 pimatic-rfl868
 ==============
