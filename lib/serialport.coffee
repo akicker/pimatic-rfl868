@@ -1,81 +1,82 @@
 events = require 'events'
 
-serialport = require("serialport")
-SerialPort = serialport.SerialPort
+SerialPort = require("serialport")
+Delimiter = SerialPort.parsers.Delimiter
 
 Promise = require 'bluebird'
 Promise.promisifyAll(SerialPort.prototype)
 
+
 class SerialPortDriver extends events.EventEmitter
 
-  constructor: (@protocolOptions) ->
+  constructor: (protocolOptions)->
+    super()
+    @serialPort = new SerialPort(protocolOptions.serialDevice, {
+      baudRate: protocolOptions.baudrate,
+      autoOpen: false
+    })
 
-  _createSerialPort: ->
-    @serialPort = new SerialPort(@protocolOptions.serialDevice, {
-      baudrate: @protocolOptions.baudrate,
-      parser: serialport.parsers.readline("\r\n")
-    }, false)
+  _open: () ->
+    unless @serialPort.isOpen
+      @serialPort.openAsync()
+    else
+      Promise.resolve()
 
-    @serialPort.on('open', =>
-      @emit 'debug', 'Connection to RFL868 device opened'
-      @emit 'open'
-    )
+  connect: (timeout, retries) ->
+    resolver = null
+    @ready = no
+    @serialPort.removeAllListeners('error')
+    @serialPort.removeAllListeners('data')
+    @serialPort.removeAllListeners('close')
+    @parser.removeAllListeners('data') if @parser?
 
-    @serialPort.on('error', (error) =>
-      @emit('error', error)
-    )
-
+    @serialPort.on('error', (error) => @emit('error', error) )
     @serialPort.on('close', =>
-      @emit 'debug', 'Close event from serial device'
+      @serialPort.removeAllListeners('data')
+      @serialPort.removeAllListeners('close')
       @emit 'close'
     )
+    @parser = @serialPort.pipe(new Delimiter({ delimiter: '\r\n', encoding: 'ascii' }))
 
-    # setup data listner
-    @serialPort.on('data', (data) =>
+    # setup data listener
+    @parser.on("data", (data) =>
       # Sanitize data
       line = data.replace(/\0/g, '').trim()
       @emit('data', line)
-    )
-
-
-  connect: =>
-    if @serialPort?.isOpen()
-      console.trace 'connect'
-      @emit 'warning', 'Connect called while already connected'
-      return Promise.resolve(false)
-
-    @emit 'debug', 'Opening connection to RFL868 device...'
-
-    # we recreate the serial port as subsequent open/close/open does not seem to work
-    @_createSerialPort()
-
-    return @serialPort.openAsync().then( =>
-
-      return new Promise((resolve) =>
-        if (@serialPort.isOpen())
-          resolve()
+      readyLine = line.match(/ready(?: ([a-z]+)-([0-9]+\.[0-9]+\.[0-9]+))?/)
+      if readyLine?
+        @ready = yes
+        @emit 'ready', {tag: readyLine[1], version: readyLine[2]}
+      else
+        unless @ready
+          # got, data but was not ready => reset
+          @serialPort.writeAsync("RESET\n").catch( (error) -> @emit("error", error) )
         else
-          @emit 'debug', 'Not yet connected after serial port was opened, schedule open event callback'
-          @serialPort.once("open", resolve)
-
-      )
+          @emit('line', line)
     )
 
-  disconnect: =>
-    unless @serialPort?.isOpen()
-      @emit 'warning', 'Disconnect called while not connected'
-      return Promise.resolve(false)
+    return new Promise( (resolve, reject) =>
+      resolver = resolve
+      @_open().then(() =>
+        Promise.delay(1000).then( =>
+          # write ping to force reset (see data listener) if device was not reset probably
+          @serialPort.writeAsync("PING\n").catch(reject)
+          @once("ready", resolver)
+        )
+      ).catch(reject)
+    ).timeout(timeout).catch( (err) =>
+      @removeListener("ready", resolver)
+      @serialPort.removeAllListeners('data')
+      if err.name is "TimeoutError" and retries > 0
+        @emit 'reconnect', err
+        # try to reconnect
+        return @connect(timeout, retries-1)
+      else
+        throw err
+    )
 
-    return @serialPort.closeAsync().then(@serialPort = undefined)
+  disconnect: -> @serialPort.closeAsync()
 
-  write: (data) =>
-    unless @serialPort?.isOpen()
-      throw new Error "Tried to send data '#{data.trim()}' while we were not connected"
-
-    @emit 'send', data
-    @serialPort.writeAsync(data)
-
-  isConnected: ->
-    return @serialPort?.isOpen()
+  write: (data) -> @serialPort.writeAsync(data)
 
 module.exports = SerialPortDriver
