@@ -12,12 +12,6 @@ cd /home/pi/pimatic-app/node_modules/pimatic-rfl868
 
 npm install
 
-npm install -g npm-install-peers
-
-npm-install-peers
-
-npm rebuild
-
 manually add plugin rfl868 to config.json
 
 cd
