@@ -8,6 +8,8 @@ class Board extends events.EventEmitter
 
   _awaitingAck: []
   _dynamicReconnectInterval: 0
+  _opened: no
+  ready: no
 
   constructor: (driverOptions, @protocol, @connectionTimeout, @reconnectInterval, @pingInterval) ->
     # await the ready message to be received before writes are allowed
@@ -17,7 +19,11 @@ class Board extends events.EventEmitter
     @driver = new SerialPortDriver(driverOptions)
 
     @_lastAction = Promise.resolve()
-
+    @driver.on('ready', (boardinfo) => 
+      @_lastDataTime = new Date().getTime()
+      @ready = yes
+      @emit('ready', boardinfo) 
+    )
     @driver.on('debug', (debug) =>
       @emit 'debug', debug
     )
@@ -28,10 +34,14 @@ class Board extends events.EventEmitter
 
     @driver.on('error', (error) =>
       @emit 'error', error
-      @emit 'warning', 'Try to recover from the error by reconnecting to the RFL868 device'
+      @emit 'warning', 'Try to recover from the error by reconnecting to the RFLink device'
       @reconnect()
     )
-
+    @driver.on('reconnect', (error) => @emit('reconnect', error) )
+    @driver.on('close', => 
+      @ready = no
+      @emit('close')
+    )
     @driver.on('close', =>
       # serial port closed, await an acknowledge for the ready to be received
       @_blockWritesUntilready()
@@ -46,10 +56,14 @@ class Board extends events.EventEmitter
     @driver.on("send", (data) =>
       @emit "send", data
     )
-
+    @driver.on("line", (line) =>
+      @emit "line", line
+      @_onLine(line)
+    )
+    @on('ready', => @setupWatchdog())
 
   connect: =>
-    return @driver.connect()
+    return @driver.connect(300000, 3)
       .then( =>
         # driver connected, register timeout on acknowledge of ready message
         @connectionReady
@@ -61,7 +75,7 @@ class Board extends events.EventEmitter
         )
       ).timeout(@connectionTimeout, 'Connection not opened within connection timeout')
       .catch( (err) =>
-        if @driver.isConnected()
+        if @ready
           @disconnect()
 
         retryTime = @_determineReconnectInterval()
@@ -81,7 +95,7 @@ class Board extends events.EventEmitter
 
   reconnect: =>
     @emit 'debug', 'Attempt to reconnect to device...'
-    if @driver.isConnected()
+    if @ready
       @disconnect().then(=>
         @connect()
       )
@@ -123,8 +137,8 @@ class Board extends events.EventEmitter
       # continue if this line would make us ready and store state
       unless event.name.indexOf('RFLink Gateway') > -1
         # we receive a non-ready message before a ready message
-        # reboot the RFL868 to reset its state
-        @emit 'warning', "Received data before the ready message from RFL868, discard and reboot..."
+        # reboot the RFLink to reset its state
+        @emit 'warning', "Received data before the ready message from RFLink, discard and reboot..."
         @driver.write(@protocol.encodeLine({action: "REBOOT"}))
         return
 
@@ -149,7 +163,7 @@ class Board extends events.EventEmitter
 
     @_lastDataTime = 0
     @_awaitingAck = [ =>
-      @emit 'debug', 'Received welcome message from RFL868'
+      @emit 'debug', 'Received welcome message from RFLink'
       @_markConnectionReady()
       # reset the _dynamicReconnectInterval to start at quick reconnect again
       @_dynamicReconnectInterval = 0
