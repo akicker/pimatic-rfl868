@@ -28,7 +28,7 @@
     "serialport": "^6.2.2"
   },
   "peerDependencies": {
-    "pimatic": ">=0.8.0 <1.0.0"
+    "pimatic": "0.9.*"
   },
   "engines": {
     "node": ">0.8.x",
