@@ -4,8 +4,6 @@ Install with:
 
 sudo service pimatic stop
 
-npm install -g npm
-
 cd /home/pi/pimatic-app/node_modules/ 
 
 git clone https://github.com/akicker/pimatic-rfl868.git
