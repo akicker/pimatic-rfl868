@@ -24,11 +24,11 @@
   },
   "configSchema": "rfl868-config-schema.coffee",
   "dependencies": {
-    "bluebird": "^3.5.3",
-    "serialport": "^6.2.2"
+    "bluebird": "^2.9.14",
+    "serialport": "~6.2.2"
   },
   "peerDependencies": {
-    "pimatic": "0.9.*"
+    "pimatic": "~0.9.*"
   },
   "engines": {
     "node": ">0.8.x",
