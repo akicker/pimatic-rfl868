@@ -12,8 +12,16 @@ cd /home/pi/pimatic-app/node_modules/pimatic-rfl868
 
 npm install
 
-manually add plugin rfl868 to config.json
+You can load the plugin by editing your `config.json` to include:
 
+```json
+{
+  "plugin": "rfl868",
+  "driverOptions": {
+    "serialDevice": "/dev/tty.ACM0"
+  }
+}
+```
 cd
 
 sudo /home/pi/pimatic-app/node_modules/pimatic/pimatic.js
