@@ -1,4 +1,4 @@
-Updated Version to run with node 8 using serialport 6.2.2
+V 0.7.3 to run on node 8 using serialport 6.2.2
 =========================================================
 Install with:
 
