@@ -13,7 +13,6 @@
   "version": "0.7.3",
   "license": "GPL-2.0",
   "homepage": "http://http://pimatic.org",
-  "private": true,
   "repository": {
     "type": "git",
     "url": "git:https://github.com/akicker/pimatic-rfl868.git"
