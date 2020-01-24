@@ -1,11 +1,7 @@
 {
   "name": "pimatic-rfl868",
   "description": "pimatic plugin to use various 868 MHz devices, sensors and more with an rfl868 gateway.",
-  "author": {
-    "name": "Guss",
-    "email": "guss1359@gmail.com",
-    "url": "http://github.com/akicker/pimatic-rfl868"
-  },
+  "author": "Guss <guss1359@gmail.com> (https://github.com/akicker/pimatic-rfl868)",
   "main": "rfl868",
   "files": [
     "rfl868.coffee",
@@ -16,11 +12,11 @@
   ],
   "version": "0.7.3",
   "license": "GPL-2.0",
-  "homepage": "http://github.com/akicker",
+  "homepage": "http://http://pimatic.org",
   "private": true,
   "repository": {
     "type": "git",
-    "url": "git:https://github.com/akicker/pimatic-rfl868"
+    "url": "git:https://github.com/akicker/pimatic-rfl868.git"
   },
   "configSchema": "rfl868-config-schema.coffee",
   "dependencies": {
