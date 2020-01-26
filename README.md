@@ -18,7 +18,7 @@ You can load the plugin by editing your `config.json` to include:
 {
   "plugin": "rfl868",
   "driverOptions": {
-    "serialDevice": "/dev/tty.ACM0"
+    "serialDevice": "/dev/ttyACM0"
   }
 }
 ```
