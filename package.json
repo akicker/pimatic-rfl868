@@ -20,7 +20,7 @@
   "configSchema": "rfl868-config-schema.coffee",
   "dependencies": {
     "bluebird": "^2.9.14",
-    "serialport": "~6.2.2"
+    "serialport": ">=6.2.2"
   },
   "peerDependencies": {
     "pimatic": "~0.9.*"
